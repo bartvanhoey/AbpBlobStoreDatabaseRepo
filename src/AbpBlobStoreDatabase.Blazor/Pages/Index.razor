@@ -1,46 +1,35 @@
 ﻿@page "/"
-@using AbpBlobStoreDatabase.Application.Contracts
-@inject IFileAppService FileAppService
-<h3>Upload PNG images</h3>
-
-<p>
-    <InputFile OnChange="@OnInputFileChange" multiple />
-</p>
-
-@if (imageDataUrls.Count > 0)
-{
-    <h4>Images</h4>
-
-    <div class="card" style="width:30rem;">
-        <div class="card-body">
-            @foreach (var imageDataUrl in imageDataUrls)
-            {
-                <img class="rounded m-1" src="@imageDataUrl" />
-            }
-        </div>
-    </div>
-}
-
-@code {
-    private IList<string> imageDataUrls = new List<string>();
-
-    private async Task OnInputFileChange(InputFileChangeEventArgs e)
-    {
-        var maxAllowedFiles = 3;
-        var format = "image/png";
-
-        foreach (var imageFile in e.GetMultipleFiles(maxAllowedFiles))
+<Row Class="mb-4">
+    <Column ColumnSize="ColumnSize.Is6">
+        <h3>Save Image To Database</h3>
+        <p>
+            <InputFile OnChange="@OnInputFileChange" />
+        </p>
+        @if (imageDataUrls.Count > 0)
         {
-            var resizedImageFile = await imageFile.RequestImageFileAsync(format, 
-                100, 100);
-            var buffer = new byte[resizedImageFile.Size];
-            await resizedImageFile.OpenReadStream().ReadAsync(buffer);
-
-            await FileAppService.SaveBlobAsync(new SaveBlobInputDto {Name = imageFile.Name, Content = buffer});
-
-            var imageDataUrl = 
-                $"data:{format};base64,{Convert.ToBase64String(buffer)}";
-            imageDataUrls.Add(imageDataUrl);
+            <h4>Images</h4>
+            <div class="card" style="width:30rem;">
+                <div class="card-body">
+                    @foreach (var imageDataUrl in imageDataUrls)
+                    {
+                        <img class="rounded m-1" src="@imageDataUrl" />
+                    }
+                </div>
+            </div>
         }
-    }
-}
+    </Column>
+</Row>
+<hr>
+<Row Class="mb-4">
+    <Column ColumnSize="ColumnSize.Is6">
+        <h3>Get Image From Database</h3>
+        <div class="card" style="width:30rem;">
+            <div class="card-body">
+                <img class="rounded m-1" src="@GetImage" />
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary" @onclick="@GetImageFromDb">GetImage</button>
+            </div>
+        </div>
+    </Column>
+</Row>
